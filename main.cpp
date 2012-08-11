@@ -39,13 +39,23 @@ void openni_callback(
     std::vector<uchar> status;
     std::vector<float> error;
     cv::calcOpticalFlowPyrLK(prev_image_gray, image_gray, prev_points, next_points, status, error, cv::Size(5,5), 5);
+
+    for(size_t i=0; i<next_points.size(); ++i)
+    {
+      if(!status[i]) continue;
+
+      cv::circle(image, prev_points[i], 5, cv::Scalar(0));
+      cv::circle(image, next_points[i], 5, cv::Scalar(0));
+      cv::line(image, prev_points[i], next_points[i], cv::Scalar(128));
+    }
+
+
   }
   
   imshow("image", image);
   cv::waitKey(50);
 
   cv::goodFeaturesToTrack(image_gray, prev_points, 50, 0.01, 5);
-  std::cout << "Detected " << prev_points.size() << " points" << std::endl;
   image_gray.copyTo(prev_image_gray);
 }
 
