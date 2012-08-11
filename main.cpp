@@ -1,3 +1,5 @@
+#define linux true
+
 #include <pcl/io/pcd_io.h>
 #include <pcl/point_types.h>
 #include <pcl/io/openni_grabber.h>
@@ -36,11 +38,11 @@ void openni_callback(
     std::vector<cv::Point2f> next_points;
     std::vector<uchar> status;
     std::vector<float> error;
-    cv::calcOpticalFlowPyrLK(prev_image_gray, image_gray, prev_points, next_points, status, error);
+    cv::calcOpticalFlowPyrLK(prev_image_gray, image_gray, prev_points, next_points, status, error, cv::Size(5,5), 5);
   }
   
-  //imshow("image", image);
-  //cv::waitKey(50);
+  imshow("image", image);
+  cv::waitKey(50);
 
   cv::goodFeaturesToTrack(image_gray, prev_points, 50, 0.01, 5);
   std::cout << "Detected " << prev_points.size() << " points" << std::endl;
@@ -57,7 +59,8 @@ int main(int argc, char** argv)
         boost::shared_ptr<openni_wrapper::Image> const &,
         boost::shared_ptr<openni_wrapper::DepthImage> const&,
         float)
-    > openni_callback_func =
+    >
+    openni_callback_func =
     boost::bind (openni_callback, _1, _2, _3);
 
   interface->registerCallback(openni_callback_func);
