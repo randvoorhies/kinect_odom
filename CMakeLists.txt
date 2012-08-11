@@ -28,3 +28,5 @@ target_link_libraries(kinect_odom ${OPENCV_LIBRARIES})
 
 include_directories(/usr/include/vtk-5.8)
 
+add_definitions(-Wno-deprecated)
+
