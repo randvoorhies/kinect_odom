@@ -3,38 +3,45 @@
 #include <pcl/io/openni_grabber.h>
 #include <pcl/visualization/cloud_viewer.h>
 #include <iostream>
+#include <opencv2/core/core.hpp>
+#include <opencv2/highgui/highgui.hpp>
 
-void cloud_callback(pcl::PointCloud<pcl::PointXYZRGBA>::ConstPtr const & cloud, pcl::visualization::CloudViewer * viewer)
-{
-  std::cout << "Got Cloud" << std::endl;
-  if(!viewer->wasStopped())
-    viewer->showCloud(cloud);
-}
 
-void image_callback(boost::shared_ptr<openni_wrapper::Image> const & image)
+void openni_callback(
+    boost::shared_ptr<openni_wrapper::Image> const & ni_image,
+    boost::shared_ptr<openni_wrapper::DepthImage> const & ni_depth_image,
+    float constant,
+    boost::mutex * mtx)
 {
-  std::cout << "Got Image" << std::endl;
+  float const focal_length = 1.0 / constant;
+  std::cout << "Got Data - focal length: " << focal_length << std::endl;
+
+  cv::Mat image(ni_image->getHeight(), ni_image->getWidth(), CV_8UC3);
+  ni_image->fillRGB( ni_image->getWidth(), ni_image->getHeight(),
+      reinterpret_cast<uint8_t*>(&image.begin<uint8_t>()[0]));
+
+  {
+    imshow("image", image);
+    cv::waitKey(50);
+  }
 }
 
 int main(int argc, char** argv)
-{  
+{
+  boost::mutex mtx;
+
   pcl::Grabber * interface = new pcl::OpenNIGrabber();
 
-  pcl::visualization::CloudViewer viewer("viewer");
+  boost::function<void (boost::shared_ptr<openni_wrapper::Image> const &, boost::shared_ptr<openni_wrapper::DepthImage> const&, float)> openni_callback_func =
+         boost::bind (openni_callback, _1, _2, _3, &mtx);
+  interface->registerCallback(openni_callback_func);
+ 
+  interface->start(); 
 
-  boost::function<void (pcl::PointCloud<pcl::PointXYZRGBA>::ConstPtr const&)> cloud_callback_func =
-         boost::bind (cloud_callback, _1, &viewer);
-  interface->registerCallback(cloud_callback_func);
-
-  boost::function<void (boost::shared_ptr<openni_wrapper::Image> const &)> image_callback_func =
-         boost::bind (image_callback, _1);
-  interface->registerCallback(image_callback_func);
-
-  interface->start();
-
-  while(!viewer.wasStopped())
+  while(true)
+  {
     sleep(1);
-  interface->stop();
+  }
 
   return 0;
 }

@@ -22,5 +22,9 @@ pkg_check_modules(OPENNI openni)
 include_directories(${OPENNI_INCLUDE_DIRS})
 target_link_libraries(kinect_odom ${OPENNI_LIBRARIES})
 
+pkg_check_modules(OPENCV opencv)
+include_directories(${OPENCV_INCLUDE_DIRS})
+target_link_libraries(kinect_odom ${OPENCV_LIBRARIES})
+
 include_directories(/usr/include/vtk-5.8)
 
