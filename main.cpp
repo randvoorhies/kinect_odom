@@ -53,7 +53,7 @@ void openni_callback(
   cv::Mat_<float> curr_depth_image(ni_depth_image->getHeight(), ni_depth_image->getWidth());
   ni_depth_image->fillDepthImage(ni_depth_image->getWidth(), ni_depth_image->getHeight(), &curr_depth_image.begin()[0]);
 
-  if(prev_points_2D.size() > 0)
+  if(not prev_points_2D.empty())
   {
     // Track the points detected from the last frame
     std::vector<cv::Point2f> curr_points_2D;
@@ -102,19 +102,20 @@ void openni_callback(
     }
     //printf("-------------------------------\n\n");
 
-    //if(curr_points_2D_clean.size() > 0)
-    //{
-    //  // Find the affine transformation
-    //  cv::Mat_<float> affine_transform;
-    //  std::vector<uchar> outliers;
-    //  cv::estimateAffine3D(prev_points_3D, curr_points_3D, affine_transform, outliers, 0.01);
-    //  //std::cout << "Outliers: " << outliers.size() << std::endl;
-    //  printf("T: [%+0.4f, %+0.4f, %+0.4f] Outliers: %zu\n",
-    //    affine_transform.at<float>(0,3),
-    //    affine_transform.at<float>(1,3),
-    //    affine_transform.at<float>(2,3),
-    //    outliers.size());
-    //}
+    if(not curr_points_2D_clean.empty())
+    {
+      // Find the affine transformation
+      cv::Mat affine_transform;
+      std::vector<uchar> outliers;
+      cv::estimateAffine3D(prev_points_3D, curr_points_3D, affine_transform, outliers, .1);
+
+      printf("T: [%+0.4f, %+0.4f, %+0.4f] Outliers: %zu/%zu\n",
+        affine_transform.at<double>(0,3),
+        affine_transform.at<double>(1,3),
+        affine_transform.at<double>(2,3),
+        outliers.size(),
+        prev_points_3D.size());
+    }
 
     // Copy data for visualization
     {
@@ -136,7 +137,7 @@ void openni_callback(
   curr_depth_image.copyTo(prev_depth_image);
 
   // Detect trackable features in the next frame
-  cv::goodFeaturesToTrack(prev_image_gray, prev_points_2D, 50, 0.01, 5);
+  cv::goodFeaturesToTrack(prev_image_gray, prev_points_2D, 200, 0.01, 5);
 }
 
 // ######################################################################
