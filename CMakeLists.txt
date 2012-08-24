@@ -27,7 +27,9 @@ pkg_check_modules(OPENCV opencv)
 include_directories(${OPENCV_INCLUDE_DIRS})
 target_link_libraries(kinect_odom ${OPENCV_LIBRARIES})
 
-include_directories(/usr/include/vtk-5.8)
+find_package(VTK)
+include_directories(${VTK_INCLUDE_DIRS})
+target_link_libraries(kinect_odom ${VTK_LIBRARIES})
 
-add_definitions(-Wno-deprecated -std=c++0x)
+add_definitions(-Wno-deprecated -std=c++0x -g)
 
