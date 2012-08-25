@@ -17,13 +17,6 @@
 
 #include "rcv.hpp"
 
-std::mutex mutex_;
-std::vector<cv::Point2f> prev_points_2D_;
-std::vector<cv::Point2f> curr_points_2D_;
-std::vector<cv::Point3f> prev_points_3D_;
-std::vector<cv::Point3f> curr_points_3D_;
-cv::Mat curr_image_;
-
 std::vector<double> dx_plot_data;
 std::vector<double> dy_plot_data;
 std::vector<double> dz_plot_data;
@@ -103,12 +96,7 @@ void openni_callback(
       pcl::PointXYZ const prev_point((pp.x-cx)*prev_depth/focal_length, (pp.y-cy)*prev_depth/focal_length, prev_depth);
       prev_points_3D->push_back(prev_point);
 
-      //printf("(%0.3f %0.3f)[%f] -> (%0.3f %0.3f)[%f] :: [%0.3f %0.3f %0.3f] -> [%0.3f %0.3f %0.3f]\n",
-      //    pp.x, pp.y, prev_depth, np.x, np.y, curr_depth,
-      //    prev_point.x, prev_point.y, prev_point.z,
-      //    curr_point.x, curr_point.y, curr_point.z);
     }
-    //printf("-------------------------------\n\n");
 
     curr_points_3D->width  = curr_points_3D->points.size();
     curr_points_3D->height = 1;
@@ -138,16 +126,6 @@ void openni_callback(
         dy_plot_data.erase(dy_plot_data.begin());
         dz_plot_data.erase(dz_plot_data.begin());
       }
-    }
-
-    // Copy data for visualization
-    {
-      std::lock_guard<std::mutex> _(mutex_);
-      prev_points_2D_ = prev_points_2D_clean;
-      curr_points_2D_ = curr_points_2D_clean; 
-      //prev_points_3D_ = prev_points_3D;
-      //curr_points_3D_ = curr_points_3D;
-      curr_image.copyTo(curr_image_);
     }
   }
   
@@ -190,45 +168,9 @@ int main(int argc, char** argv)
  
   interface->start(); 
 
-
-  //boost::shared_ptr<pcl::visualization::PCLVisualizer> viewer (new pcl::visualization::PCLVisualizer ("3D Track Viewer"));
-  //viewer->setBackgroundColor (0, 0, 0);
-  //viewer->addCoordinateSystem (1.0);
-  //viewer->initCameraParameters ();
-
   while(true)
   {
     usleep(50000);
-    //viewer->spinOnce(100);
-
-    //viewer->removePointCloud("track cloud");
-    //pcl::PointCloud<pcl::PointXYZRGB>::Ptr visualization_cloud (new pcl::PointCloud<pcl::PointXYZRGB>);
-    //visualization_cloud->clear();
-    //{
-    //  std::lock_guard<std::mutex> _(mutex_);
-    //  if(curr_points_3D_.size() == 0) continue;
-
-    //  for(int i=0; i<prev_points_2D_.size(); ++i)
-    //  {
-    //    pcl::PointXYZRGB curr_point_3D;
-
-    //    curr_point_3D.x = curr_points_3D_[i].x;
-    //    curr_point_3D.y = curr_points_3D_[i].y;
-    //    curr_point_3D.z = curr_points_3D_[i].z;
-
-    //    cv::Vec3b c = curr_image_.at<cv::Vec3b>(int(curr_points_2D_[i].y), int(curr_points_2D_[i].x));
-    //    uint32_t const rgb = ((uint32_t)c[2] << 16 | (uint32_t)c[1] << 8 | (uint32_t)c[0]);
-    //    curr_point_3D.rgb = *reinterpret_cast<float const*>(&rgb);
-
-    //    visualization_cloud->push_back(curr_point_3D);
-    //  }
-    //}
-    //visualization_cloud->height = 1;
-    //visualization_cloud->width = visualization_cloud->points.size();
-
-    //pcl::visualization::PointCloudColorHandlerRGBField<pcl::PointXYZRGB> rgb_handler(visualization_cloud);
-    //viewer->addPointCloud<pcl::PointXYZRGB> (visualization_cloud, rgb_handler, "track cloud");
-    //viewer->setPointCloudRenderingProperties (pcl::visualization::PCL_VISUALIZER_POINT_SIZE, 5, "track cloud");
   }
 
   return 0;
