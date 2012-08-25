@@ -11,6 +11,7 @@ Current Status
 The basic functionality is not in place, and the algorithm produces reasonable looking velocity measurements.
 
 The algorithm (for now) is as follows:
+
 1. Detect features in the previous frame
 1. Track those features using Lucas & Kanade Optical Flow to get a corresponding set of features in the current frame
 1. Project both feature sets into 3D using the kinect depth map and a pinhole camera model
