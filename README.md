@@ -8,7 +8,7 @@ This is a project to play around with visual odometry using a kinect.
 Current Status
 =============
 
-The basic functionality is not in place, and the algorithm produces reasonable looking velocity measurements.
+The basic functionality is now in place, and the algorithm produces reasonable looking velocity measurements.
 
 The algorithm (for now) is as follows:
 
